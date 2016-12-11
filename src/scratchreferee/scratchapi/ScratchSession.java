@@ -54,11 +54,15 @@ public final class ScratchSession {
 		return null;
 	}
 
-	public long newProject(String name, String payload) throws IOException {
+	public long newProject(String name, String payload, Map<String, byte[]> media) throws IOException {
 		HttpResponse response = ScratchNetworkUtil.execute("POST", "projects.scratch.mit.edu",
 				"/internalapi/project/new/set/?v=v452.1&_rnd=0.5618316377513111&title=" + name, null, sessionId,
 				payload);
-		return response.parseBody().getLong("content-name");
+		long projectId = response.parseBody().getLong("content-name");
+		
+		// TODO post media
+		
+		return projectId;
 	}
 	
 	private static final String readStream(InputStream stream) throws IOException {
@@ -80,16 +84,15 @@ public final class ScratchSession {
 		return readFile("defaultprojectdata.txt");
 	}
 	
+	public long newProject(String name, String payload) throws IOException {
+		return newProject(name, payload, new HashMap<String, byte[]>());
+	}
+	
 	public long newProject() throws IOException {
 		return newProject("Untitled", readDefaultProjectData());
 	}
-	
-	public long newProject(String sb2FileName) throws IOException {
-		String projectName = sb2FileName.substring(0, sb2FileName.length() - 4);
-		ZipFile project = new ZipFile(sb2FileName);
-		String payload = readStream(project.getInputStream(project.getEntry("project.json")));
-		// TODO upload project media, i.e. sounds and graphics
-		project.close();
-		return newProject(projectName, payload);
+
+	public long newProject(String name, ScratchProject project) throws IOException {
+		return newProject(name, project.payload.toString(), project.media);
 	}
 }

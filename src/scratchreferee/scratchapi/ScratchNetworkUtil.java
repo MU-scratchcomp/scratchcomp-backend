@@ -46,6 +46,11 @@ public final class ScratchNetworkUtil {
 	
 	public static final HttpResponse execute(String method, String hostname, String path, Map<String, String> headers,
 			String sessionId, String body) throws IOException {
+		return execute(method, hostname, path, headers, sessionId, body.getBytes());
+	}
+	
+	public static final HttpResponse execute(String method, String hostname, String path, Map<String, String> headers,
+			String sessionId, byte[] body) throws IOException {
 		if (hostname == null)
 			hostname = "scratch.mit.edu";
 		if (path == null)
@@ -66,7 +71,7 @@ public final class ScratchNetworkUtil {
 			for (Entry<String, String> entry : headers.entrySet())
 				allHeaders.put(entry.getKey(), entry.getValue());
 		if (body != null)
-			allHeaders.put("Content-Length", Integer.toString(body.length()));
+			allHeaders.put("Content-Length", Integer.toString(body.length));
 		if (sessionId != null)
 			allHeaders.put("Cookie", allHeaders.get("Cookie") + "scratchsessionsid=" + sessionId + ";");
 
@@ -77,7 +82,7 @@ public final class ScratchNetworkUtil {
 		conn.setDoInput(true);
 		
 		DataOutputStream connOut = new DataOutputStream(conn.getOutputStream());
-		connOut.writeBytes(body);
+		connOut.write(body);
 		connOut.flush();
 		connOut.close();
 		
