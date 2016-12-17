@@ -2,14 +2,12 @@ package scratchreferee.scratchapi;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipFile;
+import java.util.Map.Entry;
 
 import org.json.JSONObject;
 
@@ -41,7 +39,7 @@ public final class ScratchSession {
 		for (String cookieList : cookieLists)
 			cookieListBuilder.append(cookieList);
 		String cookieList = cookieListBuilder.toString();
-		
+
 		String[] each = cookieList.split(";");
 		for (String binding : each) {
 			binding = binding.trim();
@@ -55,19 +53,32 @@ public final class ScratchSession {
 	}
 
 	public long newProject(String name, String payload, Map<String, byte[]> media) throws IOException {
+		/*
+		 * Post media
+		 */
+		for (Entry<String, byte[]> item : media.entrySet())
+			ScratchNetworkUtil.execute("POST", "assets.scratch.mit.edu",
+					"/internalapi/asset/" + item.getKey() + "/set/?v=v452.1&_rnd=0.4912383072078228", null, sessionId,
+					item.getValue());
+
+		/*
+		 * Post project payload
+		 */
 		HttpResponse response = ScratchNetworkUtil.execute("POST", "projects.scratch.mit.edu",
 				"/internalapi/project/new/set/?v=v452.1&_rnd=0.5618316377513111&title=" + name, null, sessionId,
 				payload);
 		long projectId = response.parseBody().getLong("content-name");
-		
-		// TODO post media
-		
+
 		return projectId;
 	}
-	
-	private static final String readStream(InputStream stream) throws IOException {
+
+	public long newProject(String name, String payload) throws IOException {
+		return newProject(name, payload, new HashMap<String, byte[]>());
+	}
+
+	private static final String readDefaultProjectData() throws IOException {
 		BufferedReader dataReader = new BufferedReader(
-				new InputStreamReader(stream));
+				new InputStreamReader(new FileInputStream("defaultprojectdata.txt")));
 		StringBuffer dataBuffer = new StringBuffer();
 		String nextLine;
 		while ((nextLine = dataReader.readLine()) != null)
@@ -75,23 +86,11 @@ public final class ScratchSession {
 		dataReader.close();
 		return dataBuffer.toString();
 	}
-	
-	private static final String readFile(String fileName) throws IOException {
-		return readStream(new FileInputStream(fileName));
-	}
-	
-	private static final String readDefaultProjectData() throws IOException {
-		return readFile("defaultprojectdata.txt");
-	}
-	
-	public long newProject(String name, String payload) throws IOException {
-		return newProject(name, payload, new HashMap<String, byte[]>());
-	}
-	
+
 	public long newProject() throws IOException {
 		return newProject("Untitled", readDefaultProjectData());
 	}
-
+	
 	public long newProject(String name, ScratchProject project) throws IOException {
 		return newProject(name, project.payload.toString(), project.media);
 	}
