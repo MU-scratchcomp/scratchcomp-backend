@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.net.URLEncoder;
 
 import org.json.JSONObject;
 
@@ -52,28 +54,52 @@ public final class ScratchSession {
 		return null;
 	}
 
-	public long newProject(String name, String payload, Map<String, byte[]> media) throws IOException {
+	public long newProject(String name, String payload, Map<String, byte[]> media, byte[] thumbnail)
+			throws IOException {
 		/*
 		 * Post media
 		 */
 		for (Entry<String, byte[]> item : media.entrySet())
 			ScratchNetworkUtil.execute("POST", "assets.scratch.mit.edu",
-					"/internalapi/asset/" + item.getKey() + "/set/?v=v452.1&_rnd=0.4912383072078228", null, sessionId,
+					"/internalapi/asset/" + item.getKey() + "/set/" + newProjectQueryString(), null, sessionId,
 					item.getValue());
 
 		/*
 		 * Post project payload
 		 */
 		HttpResponse response = ScratchNetworkUtil.execute("POST", "projects.scratch.mit.edu",
-				"/internalapi/project/new/set/?v=v452.1&_rnd=0.5618316377513111&title=" + name, null, sessionId,
-				payload);
+				"/internalapi/project/new/set/" + newProjectQueryString(new String[] { "title", name }), null,
+				sessionId, payload);
 		long projectId = response.parseBody().getLong("content-name");
+
+		/*
+		 * Post project thumbnail
+		 */
+		if (thumbnail != null && thumbnail.length > 0)
+			ScratchNetworkUtil.execute("POST", "scratch.mit.edu",
+					"/internalapi/project/thumbnail/" + projectId + "/set/" + newProjectQueryString(), null, sessionId,
+					thumbnail);
 
 		return projectId;
 	}
 
+	private String newProjectQueryString(String[]... parameters) throws UnsupportedEncodingException {
+		String[][] allParameters = new String[parameters.length + 2][];
+		allParameters[0] = new String[] { "v", "v459.1" };
+		allParameters[1] = new String[] { "_rnd", Double.toString(Math.random()) };
+		System.arraycopy(parameters, 0, allParameters, 2, parameters.length);
+
+		String[] parameterStrings = new String[allParameters.length];
+		for (int i = 0; i < allParameters.length; i++) {
+			parameterStrings[i] = URLEncoder.encode(allParameters[i][0], "UTF-8") + "="
+					+ URLEncoder.encode(allParameters[i][1], "UTF-8");
+		}
+
+		return "?" + String.join("&", parameterStrings);
+	}
+
 	public long newProject(String name, String payload) throws IOException {
-		return newProject(name, payload, new HashMap<String, byte[]>());
+		return newProject(name, payload, new HashMap<String, byte[]>(), null);
 	}
 
 	private static final String readDefaultProjectData() throws IOException {
@@ -90,8 +116,12 @@ public final class ScratchSession {
 	public long newProject() throws IOException {
 		return newProject("Untitled", readDefaultProjectData());
 	}
-	
+
 	public long newProject(String name, ScratchProject project) throws IOException {
-		return newProject(name, project.payload.toString(), project.media);
+		return newProject(name, project.payload.toString(), project.media, null);
+	}
+	
+	public long newProject(String name, ScratchProject project, byte[] thumbnailPNG) throws IOException {
+		return newProject(name, project.payload.toString(), project.media, thumbnailPNG);
 	}
 }

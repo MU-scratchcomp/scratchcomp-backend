@@ -13,5 +13,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/scratchreferee/lib/commons-codec-1.10/commons-codec-1.10-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/commons-csv-1.5/commons-csv-1.5.jar" sourcepath="lib/commons-csv-1.5-src/src"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -228,8 +228,10 @@ final class ScratchNetworkUtil {
 			if (headers != null)
 				for (Entry<String, String> entry : headers.entrySet())
 					allHeaders.put(entry.getKey(), entry.getValue());
-			if (body != null)
+			if (body != null) {
 				allHeaders.put("Content-Length", Integer.toString(body.length));
+				allHeaders.put("Content-Type", "application/json");
+			}
 			if (sessionId != null)
 				allHeaders.put("Cookie", allHeaders.get("Cookie") + "scratchsessionsid=" + sessionId + ";");
 
