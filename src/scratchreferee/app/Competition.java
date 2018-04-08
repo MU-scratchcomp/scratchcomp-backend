@@ -26,12 +26,14 @@ public class Competition {
 		}
 		
 		final String webPath = args[1];
-		final String uploadsPath = webPath + "uploads";
+		final String uploadsPath = webPath + "/uploads";
 		final Pattern uploadPattern = Pattern.compile("team([0-9]+)prob([0-9]+)(project|design).+(\\..+)");
 		final Pattern clarifyPattern = Pattern.compile("question.*\\.txt");
 		final String appdataPath = args[0];
 		final String savePath = appdataPath + "/data/submissions";
 		final Pattern savePattern = Pattern.compile("prob([0-9]+)sub([0-9]+).+");
+		System.out.println("Uploads path: " + uploadsPath);
+		System.out.println("Save path: " + savePath);
 
 		final String username = "MUScratchJudging17";
 		final String password = "Dr.Gorliss";
