@@ -183,6 +183,7 @@ public class Competition {
 
 								PrintWriter indexWriter = new PrintWriter(new FileOutputStream(
 										new File(savePath + "/index.csv"), true));
+								indexWriter.println();
 								indexWriter.println(team + "," + problem + "," + submission + ",");
 								indexWriter.flush();
 								indexWriter.close();
