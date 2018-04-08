@@ -101,6 +101,7 @@ public class Competition {
 							Files.copy(upload.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 							Files.delete(upload.toPath());
 							targetFile.setReadable(true, false);
+							targetFile.setWritable(true, false);
 							System.out.println("Transferred file: " + upload.getName());
 							
 							continue;
@@ -140,6 +141,7 @@ public class Competition {
 						Files.copy(upload.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 						Files.delete(upload.toPath());
 						targetFile.setReadable(true, false);
+						targetFile.setWritable(true, false);
 						System.out.println("Transferred file: T" + team + "P" + problem + "S" + submission);
 						
 						/*
@@ -184,6 +186,8 @@ public class Competition {
 								indexWriter.println(team + "," + problem + "," + submission + ",");
 								indexWriter.flush();
 								indexWriter.close();
+								indexFile.setReadable(true, false);
+								indexFile.setWritable(true, false);
 								System.out.println("Wrote entry to index file: " + indexFile.getAbsolutePath());
 							} catch (FileNotFoundException e) {
 								e.printStackTrace();
