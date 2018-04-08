@@ -17,12 +17,20 @@ import scratchreferee.scratchapi.ScratchSession;
 public class Competition {
 
 	public static void main(String[] args) throws IOException {
-		final String uploadsPath = "/users/majors/cmorley/public_html/uploads";
+		if (args.length != 2) {
+			System.out.println("Usage: <command> <appdata_directory_path> <frontend_directory_path>");
+			System.exit(0);
+		}
+		
+		final String webPath = args[1];
+		final String uploadsPath = webPath + "uploads";
 		final Pattern uploadPattern = Pattern.compile("team([0-9]+)prob([0-9]+)(project|design).+(\\..+)");
-		final String savePath = "/users/majors/cmorley/scratchcomp3/submissions";
+		final Pattern clarifyPattern = Pattern.compile("clarify.*\\.txt");
+		final String appdataPath = args[0];
+		final String savePath = appdataPath + "/data/submissions";
 		final Pattern savePattern = Pattern.compile("prob([0-9]+)sub([0-9]+).+");
 
-		final String username = "MUScratchJudging2017";
+		final String username = "MUScratchJudging17";
 		final String password = "Dr.Gorliss";
 		final Object loginMonitor = new Object();
 
@@ -64,7 +72,27 @@ public class Competition {
 						 */
 						Matcher m = uploadPattern.matcher(upload.getName());
 						if (!m.matches()) {
-							//System.out.println(upload.getName() + " is not a matching file name.");
+							m = clarifyPattern.matcher(upload.getName());
+							if (!m.matches()) {
+								System.out.println(upload.getName() + " is not a matching file name.");
+								continue;
+							}
+							
+							/*
+							 * Clarification file
+							 */
+							/*
+							 * Move file out of uploads folder
+							 */
+							final File targetFolder = new File(savePath + "/clarify");
+							if (!targetFolder.exists()) {
+								targetFolder.mkdirs();
+							}
+							final File targetFile = new File(
+									targetFolder.getAbsolutePath() + "/" + upload.getName());
+							upload.renameTo(targetFile);
+							System.out.println("Transferred file: " + upload.getName());
+							
 							continue;
 						}
 
@@ -164,6 +192,7 @@ public class Competition {
 											indexWriter.close();
 
 											System.out.println("Uploaded file: T" + team + "P" + problem + "S" + submission);
+											break;
 										} catch (IOException e) {
 											System.err.println("Upload IOException for " + upload.getName());
 											e.printStackTrace();
@@ -176,7 +205,7 @@ public class Competition {
 										}
 									}
 								}
-							}); // .start();
+							}).start();
 						}
 					}
 					} catch (RuntimeException e) {
