@@ -17,6 +17,9 @@ import scratchreferee.scratchapi.ScratchSession;
 public class Competition {
 
 	public static void main(String[] args) throws IOException {
+		System.out.println("Args:");
+		for (int i = 0; i < args.length; i++)
+			System.out.println(args[i]);
 		if (args.length != 2) {
 			System.out.println("Usage: <command> <appdata_directory_path> <frontend_directory_path>");
 			System.exit(0);
