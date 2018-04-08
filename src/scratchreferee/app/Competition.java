@@ -67,6 +67,7 @@ public class Competition {
 					if (stopFlag.check())
 						break;
 
+					System.out.println("Scanning...");
 					File uploadsDirectory = new File(uploadsPath);
 					uploadsDirectory.mkdirs();
 					for (final File upload : uploadsDirectory.listFiles()) {
