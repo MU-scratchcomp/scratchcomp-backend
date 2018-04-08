@@ -22,8 +22,8 @@ public class Competition {
 		System.out.println("Args:");
 		for (int i = 0; i < args.length; i++)
 			System.out.println(args[i]);
-		if (args.length != 2) {
-			System.out.println("Usage: <command> <appdata_directory_path> <frontend_directory_path>");
+		if (args.length != 4) {
+			System.out.println("Usage: <command> <appdata_directory_path> <frontend_directory_path> <scratch_judge_username> <scratch_judge_password>");
 			System.exit(0);
 		}
 		
@@ -37,8 +37,8 @@ public class Competition {
 		System.out.println("Uploads path: " + uploadsPath);
 		System.out.println("Save path: " + savePath);
 
-		final String username = "MUScratchJudging17";
-		final String password = "Dr.Gorliss";
+		final String username = args[2];
+		final String password = args[3];
 		final Object loginMonitor = new Object();
 
 		class Flag {
@@ -183,7 +183,6 @@ public class Competition {
 
 								PrintWriter indexWriter = new PrintWriter(new FileOutputStream(
 										new File(savePath + "/index.csv"), true));
-								indexWriter.println();
 								indexWriter.println(team + "," + problem + "," + submission + ",");
 								indexWriter.flush();
 								indexWriter.close();
@@ -227,7 +226,7 @@ public class Competition {
 											indexScanner.close();
 
 											PrintWriter indexWriter = new PrintWriter(new FileOutputStream(indexFile));
-											indexWriter.print(bufferedIndex.toString());
+											indexWriter.print(bufferedIndex.toString() + "\r\n");
 											indexWriter.flush();
 											indexWriter.close();
 
