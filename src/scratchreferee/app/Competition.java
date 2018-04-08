@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,9 +28,9 @@ public class Competition {
 		}
 		
 		final String webPath = args[1];
-		final String uploadsPath = webPath + "uploads";
+		final String uploadsPath = webPath + "/uploads";
 		final Pattern uploadPattern = Pattern.compile("team([0-9]+)prob([0-9]+)(project|design).+(\\..+)");
-		final Pattern clarifyPattern = Pattern.compile("question.*\\.txt");
+		final Pattern clarifyPattern = Pattern.compile("(question|clarification).*\\.txt");
 		final String appdataPath = args[0];
 		final String savePath = appdataPath + "/data/submissions";
 		final Pattern savePattern = Pattern.compile("prob([0-9]+)sub([0-9]+).+");
@@ -94,7 +96,9 @@ public class Competition {
 							}
 							final File targetFile = new File(
 									targetFolder.getAbsolutePath() + "/" + upload.getName());
-							upload.renameTo(targetFile);
+							Files.copy(upload.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+							Files.delete(upload.toPath());
+							targetFile.setReadable(true, false);
 							System.out.println("Transferred file: " + upload.getName());
 							
 							continue;
@@ -131,8 +135,32 @@ public class Competition {
 
 						final File targetFile = new File(
 								targetFolder.getAbsolutePath() + "/prob" + problem + "sub" + submission + extension);
-						upload.renameTo(targetFile);
+						Files.copy(upload.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+						Files.delete(upload.toPath());
+						targetFile.setReadable(true, false);
 						System.out.println("Transferred file: T" + team + "P" + problem + "S" + submission);
+						
+						/*
+						 * Add template feedback file
+						 */
+						final File feedbackFolder = new File(teamFolder.getAbsolutePath() + "/feedback");
+						if (!feedbackFolder.exists()) {
+							feedbackFolder.mkdirs();
+						}
+						
+						final File feedbackFile = new File(
+								feedbackFolder.getAbsolutePath() + "/prob" + problem + "sub" + submission + ".txt");
+						try {
+							PrintWriter feedbackWriter = new PrintWriter(new FileOutputStream(feedbackFile, true));
+							feedbackWriter.println("{\"score\":\"\",\"feedback\":\"\",\"judge\":\"\"}");
+							feedbackWriter.flush();
+							feedbackWriter.close();
+							feedbackFile.setReadable(true, false);
+							feedbackFile.setWritable(true, false);
+							System.out.println("Wrote empty feedback file: " + feedbackFile.getAbsolutePath());
+						} catch (FileNotFoundException e) {
+							e.printStackTrace();
+						}
 
 						/*
 						 * Add index.csv entry
@@ -159,6 +187,7 @@ public class Competition {
 								e.printStackTrace();
 							}
 						}
+						
 
 						/*
 						 * Upload project file
@@ -214,6 +243,8 @@ public class Competition {
 					}
 					} catch (RuntimeException e) {
 						e.printStackTrace();
+					} catch (IOException e1) {
+						e1.printStackTrace();
 					}
 				}
 				System.out.println("Watcher shutting down.");
