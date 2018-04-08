@@ -34,6 +34,8 @@ public class Competition {
 		final String appdataPath = args[0];
 		final String savePath = appdataPath + "/data/submissions";
 		final Pattern savePattern = Pattern.compile("prob([0-9]+)sub([0-9]+).+");
+		System.out.println("Uploads path: " + uploadsPath);
+		System.out.println("Save path: " + savePath);
 
 		final String username = "MUScratchJudging17";
 		final String password = "Dr.Gorliss";
