@@ -7,6 +7,4 @@ set $OUTPUT=bin
 
 set $MAIN=
 
-javac -cp src/:lib/JSON-java:lib/commons-io-2.5/commons-io-2.5.jar:lib/commons-codec-1.10/commons-codec-1.10.jar -d bin/ src/scratchreferee/app/Competition.java
-
-echo "compile script complete"
+javac -cp src/:lib/JSON-java:lib/commons-io-2.5/commons-io-2.5.jar:lib/commons-codec-1.10/commons-codec-1.10.jar -d bin/ src/scratchreferee/app/Competition.java && echo "compile script complete"

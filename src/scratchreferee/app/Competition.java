@@ -7,14 +7,18 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.nio.*;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import scratchreferee.scratchapi.ScratchProject;
 import scratchreferee.scratchapi.ScratchSession;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 public class Competition {
 
@@ -167,9 +171,29 @@ public class Competition {
 						}
 
 						/*
+						 * File hash
+						 */
+						FileInputStream fis = new FileInputStream(targetFile);
+						String md5 = DigestUtils.md5Hex(fis);
+						fis.close();
+						String md5Summary = md5;
+
+						final File indexFile = new File(savePath + "/index.csv");
+						if (indexFile.exists()) {
+							fis = new FileInputStream(indexFile);
+							Scanner fscan = new Scanner(fis);
+							while(fscan.hasNextLine()) {
+								String line = fscan.nextLine();
+								String[] parts = line.split(",");
+								if (parts.length >= 4 && parts[3].startsWith("\"" + md5)) {
+									md5Summary += "\\nsame as " + parts[0] + "-" + parts[1] + "-" + parts[2];
+								}
+							}
+						}
+
+						/*
 						 * Add index.csv entry
 						 */
-						final File indexFile = new File(savePath + "/index.csv");
 
 						if ((type.equals("project") && !new File(
 								teamFolder.getAbsolutePath() + "/design/prob" + problem + "sub" + submission + ".txt")
@@ -183,7 +207,7 @@ public class Competition {
 
 								PrintWriter indexWriter = new PrintWriter(new FileOutputStream(
 										new File(savePath + "/index.csv"), true));
-								indexWriter.println(team + "," + problem + "," + submission + ",");
+								indexWriter.println(team + "," + problem + "," + submission + ",\"" + md5Summary + "\",");
 								indexWriter.flush();
 								indexWriter.close();
 								indexFile.setReadable(true, false);
