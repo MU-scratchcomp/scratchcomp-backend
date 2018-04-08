@@ -171,6 +171,20 @@ public class Competition {
 						}
 
 						/*
+						 * Add template score file
+						 */
+						final File scoreFile = new File(teamFolder.getAbsolutePath() + "/score.csv");
+						if (!scoreFile.exists()) {
+							PrintWriter indexWriter = new PrintWriter(new FileOutputStream(scoreFile, true));
+							indexWriter.println("{\"0\":\"0\",\"1\":\"0\",\"2\":\"0\",\"3\":\"0\",\"4\":\"0\",\"5\":\"0\",\"balloons\":\"0\"}");
+							indexWriter.flush();
+							indexWriter.close();
+							scoreFile.setReadable(true, false);
+							scoreFile.setWritable(true, false);
+							System.out.println("Wrote template score file: " + scoreFile.getAbsolutePath());
+						}
+
+						/*
 						 * File hash
 						 */
 						FileInputStream fis = new FileInputStream(targetFile);
